@@ -13,7 +13,7 @@ public class HibernateConfiguration {
         org.hibernate.cfg.Configuration configuration = new org.hibernate.cfg.Configuration();
 
         configuration
-                .addAnnotatedClass(Student.class)
+                .addAnnotatedClass(Student.class) // -> Регистрация сущности
                 .addPackage("dev.folomkin")
                 .setProperty("hibernate.connection.driver_class", "org.postgresql.Driver")
                 .setProperty("hibernate.connection.url", "jdbc:postgresql://localhost:5433/postgres")
