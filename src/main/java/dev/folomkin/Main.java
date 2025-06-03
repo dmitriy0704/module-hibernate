@@ -16,13 +16,15 @@ public class Main {
         SessionFactory sessionFactory = context.getBean(SessionFactory.class);
         Session session = sessionFactory.openSession();
 
-
         Student student1 = new Student("Vasya", 22);
         Student student2 = new Student("Pasha", 20);
 
         // ========== -> Сохранение ========================================= //
         session.beginTransaction();
+
+        // -> Сущность переходит в состояние Persist - отслеживается Hibernate
         session.persist(student1);
+
         session.persist(student2);
         session.getTransaction().commit();
 
