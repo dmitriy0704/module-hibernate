@@ -142,7 +142,7 @@ public static void main(String[] args) {
 
 ## Жизненный цикл Entity
 
-![hibernate_entity_lifecycle.jpeg](img/hibernate_entity_lifecycle.jpeg)
+![hibernate_entity_lifecycle.jpeg](../img/hibernate_entity_lifecycle.jpeg)
 
 1. `New instance of entity`<br>
 2. `Transient State`<br>
@@ -237,14 +237,14 @@ void demo() {
 
 ```java
   void demo() {
-  Session session = sessionFactory.openSession();
-  Transaction tx = session.beginTransaction();
-  User user = new User();
-  user.setName("John");
-  session.save(user); // Теперь user в состоянии Persistent
-  user.setName("Jane"); // Изменение отследится Hibernate
-  tx.commit(); // Изменения сохранятся в базе
-  session.close();
+      Session session = sessionFactory.openSession();
+      Transaction tx = session.beginTransaction();
+      User user = new User();
+      user.setName("John");
+      session.save(user); // Теперь user в состоянии Persistent
+      user.setName("Jane"); // Изменение отследится Hibernate
+      tx.commit(); // Изменения сохранятся в базе
+      session.close();
   }
   
 ```
@@ -254,6 +254,7 @@ void demo() {
       сессии (`session.evict(user)`) делает объект отсоединённым.
     - В **Removed**: Вызов `session.delete(user)` переводит объект в состояние
       удаления.
+    - clear() - очищаются все сущности
     - Остаётся **Persistent**, пока сессия открыта и объект не удалён.
 
 ### 3. **Detached (Отсоединённое состояние)**
