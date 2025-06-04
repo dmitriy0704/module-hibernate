@@ -14,6 +14,7 @@ public class Main {
                 new AnnotationConfigApplicationContext("dev.folomkin");
 
         SessionFactory sessionFactory = context.getBean(SessionFactory.class);
+
         Session session = sessionFactory.openSession();
 
         // -> Сущности переходят в состояние Transient, т.к. создаются через new
@@ -24,27 +25,39 @@ public class Main {
         session.beginTransaction();
 
         // -> Сущность переходит в состояние Persist - отслеживается Hibernate
-        session.persist(student1);
+        session.persist(student1);  // -> метод переводит из Transient в Persistent
         session.persist(student2);
         session.getTransaction().commit();
 
         session.close(); // -> Detach - сессия больше не следит
 
+
+        // ======= Detach -> Persistent ========= //
+        // -> Новая сессия для примера перевода сущностей в разные состояния
         session = sessionFactory.openSession();
-        // -> переводит в состояние Persist = копирует состояние в сессию в состояние Persist
-        session.merge(student1);
+        // -> Из Detach в Persist.
+        // Копирует состояние сущности из базы в состояние Persist
+        // student1 - состояние отслеживаемое сессией
+        student1 = session.merge(student1);
         session.beginTransaction();
         student1.setName("Dima");
-        session.getTransaction().commit();
 
+        // -> Persistent -> Detach
+        session.detach(student1);
+        student1.setAge(32);
+
+
+        session.getTransaction().commit();
         session.close();
+
+
 
 //        // ====== -> Поиск -> Возвращается из кеша ======== //
 //        Student studentById1 = session.get(Student.class, 1L);
 //        System.out.println("Student 1: " + studentById1.toString());
 //
 //        // -> JPQL: Запрос из базы
-//        Student studentById2 = session
+//        var studentById2 = session
 //                .createQuery("SELECT s FROM Student s WHERE s.id = :id", Student.class)
 //                .setParameter("id", 2L).getSingleResult();
 //        System.out.println("Student 2: " + studentById2.toString());
