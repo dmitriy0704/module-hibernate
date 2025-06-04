@@ -1,6 +1,6 @@
 package dev.folomkin.services;
 
-import dev.folomkin.Student;
+import dev.folomkin.entity.Student;
 
 
 import org.hibernate.Session;

@@ -237,16 +237,16 @@ void demo() {
 
 ```java
   void demo() {
-      Session session = sessionFactory.openSession();
-      Transaction tx = session.beginTransaction();
-      User user = new User();
-      user.setName("John");
-      session.save(user); // Теперь user в состоянии Persistent
-      user.setName("Jane"); // Изменение отследится Hibernate
-      tx.commit(); // Изменения сохранятся в базе
-      session.close();
-  }
-  
+    Session session = sessionFactory.openSession();
+    Transaction tx = session.beginTransaction();
+    User user = new User();
+    user.setName("John");
+    session.save(user); // Теперь user в состоянии Persistent
+    user.setName("Jane"); // Изменение отследится Hibernate
+    tx.commit(); // Изменения сохранятся в базе
+    session.close();
+}
+
 ```
 
 - **Переходы**:
@@ -300,7 +300,7 @@ void demo() {
 
 ```java
 
-void demo(){
+void demo() {
     Session session = sessionFactory.openSession();
     Transaction tx = session.beginTransaction();
     User user = session.get(User.class, 1L); // Persistent
@@ -338,7 +338,7 @@ void demo(){
 ### Пример полного жизненного цикла
 
 ```java
-void demo(){
+void demo() {
     Session session = sessionFactory.openSession();
     Transaction tx = session.beginTransaction();
 
@@ -425,7 +425,6 @@ public class Main {
         session.close();
 
 
-
 //        // ====== -> Поиск -> Возвращается из кеша ======== //
 //        Student studentById1 = session.get(Student.class, 1L);
 //        System.out.println("Student 1: " + studentById1.toString());
@@ -478,3 +477,101 @@ public class Main {
 --------------------
 
 ## Связи сущностей
+
+### OneToOne
+
+К Profile привязан Student через поле в Profile. Запрос к профилю.
+
+```java
+
+@Entity
+@Table(name = "profiles")
+public class Profile {
+
+    // .......
+
+    @OneToOne
+    @JoinColumn(
+            name = "student_id", // Поле в текущей таблицы 
+            referencedColumnName = "id" // Поле в связанно й таблицы
+    )
+    public Student student;
+}
+```
+
+Для запроса к Student, чтобы получить и Profile:
+
+```java
+
+@Entity
+@Table(name = "student")
+public class Student {
+
+    @OneToOne(mappedBy = "student")
+    public Profile profile;
+}
+```
+
+Запрос в бд:
+
+```sql
+select s1_0.id,
+       s1_0.student_age,
+       s1_0.name,
+       p1_0.id,
+       p1_0.bio,
+       p1_0.last_seen_time
+from students s1_0
+         left join profiles p1_0 on s1_0.id = p1_0.student_id
+where s1_0.id = ?
+```
+
+При удалении связанных сущностей - сначала Profile, потом Student.
+
+### Каскадные операции
+
+Определяют что делать с дочерними сущностями, если вызвано состояние
+родительской сущности из списка.
+
+Например, если Student переводится в состояние Persist - нужно ли 
+переводить Profile в это же состояние.
+
+```java
+
+@Entity
+@Table(name = "students")
+public class Student {
+    
+    @OneToOne(mappedBy = "student", cascade = CascadeT ype.PERSIST)
+    private Profile profile;
+
+}
+```
+ 
+Если Student в состоянии Persist - то и Profile в Persist
+
+
+### Типы каскадных операций:
+
+    /** Cascade all operations */
+    ALL, 
+
+    /** Cascade persist operation */
+    PERSIST, 
+
+    /** Cascade merge operation */
+    MERGE, 
+
+    /** Cascade remove operation */
+    REMOVE,
+
+    /** Cascade refresh operation */
+    REFRESH,
+
+    /**
+     * Cascade detach operation
+     *
+     * @since 2.0
+     * 
+     */   
+    DETACH

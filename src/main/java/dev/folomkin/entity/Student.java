@@ -1,4 +1,4 @@
-package dev.folomkin;
+package dev.folomkin.entity;
 
 
 import jakarta.persistence.*;
@@ -18,12 +18,23 @@ public class Student {
     @Column(name = "student_age")
     private Integer age;
 
+    @OneToOne(mappedBy = "student", cascade = CascadeType.PERSIST)
+    private Profile profile;
+
     public Student() {
     }
 
     public Student(String name, Integer age) {
         this.name = name;
         this.age = age;
+    }
+
+    public Profile getProfile() {
+        return profile;
+    }
+
+    public void setProfile(Profile profile) {
+        this.profile = profile;
     }
 
     public void setId(Long id) {
