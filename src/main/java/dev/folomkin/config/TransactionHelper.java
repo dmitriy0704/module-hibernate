@@ -39,7 +39,7 @@ public class TransactionHelper {
     public <T> T executeInTransaction(Function<Session, T> action) {
         Transaction transaction = null;
         try (Session session = this.sessionFactory.openSession()) {
-            transaction = session.beginTransaction();
+            transaction = session.getTransaction();
             transaction.begin();
 
             var result = action.apply(session);

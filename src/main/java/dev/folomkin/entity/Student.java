@@ -7,7 +7,6 @@ import jakarta.persistence.*;
 @Table(name = "students")
 public class Student {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -18,15 +17,32 @@ public class Student {
     @Column(name = "student_age")
     private Integer age;
 
-    @OneToOne(mappedBy = "student", cascade = CascadeType.REMOVE)
+    @OneToOne(mappedBy = "student",cascade = CascadeType.REMOVE)
     private Profile profile;
+
+    @ManyToOne
+    @JoinColumn(name = "group_id")
+    private Group group;
 
     public Student() {
     }
 
-    public Student(String name, Integer age) {
+    public Student(
+            String name,
+            Integer age,
+            Group group
+    ) {
         this.name = name;
         this.age = age;
+        this.group = group;
+    }
+
+    public Group getGroup() {
+        return group;
+    }
+
+    public void setGroup(Group group) {
+        this.group = group;
     }
 
     public Profile getProfile() {
@@ -35,14 +51,6 @@ public class Student {
 
     public void setProfile(Profile profile) {
         this.profile = profile;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getId() {
-        return id;
     }
 
     public String getName() {
@@ -59,6 +67,14 @@ public class Student {
 
     public void setAge(Integer age) {
         this.age = age;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     @Override

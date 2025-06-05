@@ -1,9 +1,11 @@
 package dev.folomkin.config;
 
 
+import dev.folomkin.entity.Group;
 import dev.folomkin.entity.Profile;
 import dev.folomkin.entity.Student;
 import org.hibernate.SessionFactory;
+import org.hibernate.graph.Graph;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -17,6 +19,7 @@ public class HibernateConfiguration {
         configuration
                 .addAnnotatedClass(Student.class) // -> Регистрация сущности
                 .addAnnotatedClass(Profile.class)
+                .addAnnotatedClass(Group.class)
                 .addPackage("dev.folomkin")
                 .setProperty("hibernate.connection.driver_class", "org.postgresql.Driver")
                 .setProperty("hibernate.connection.url", "jdbc:postgresql://localhost:5433/postgres")
