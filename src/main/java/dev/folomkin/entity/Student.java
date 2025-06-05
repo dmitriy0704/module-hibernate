@@ -18,7 +18,7 @@ public class Student {
     @Column(name = "student_age")
     private Integer age;
 
-    @OneToOne(mappedBy = "student", cascade = CascadeType.PERSIST)
+    @OneToOne(mappedBy = "student", cascade = CascadeType.REMOVE)
     private Profile profile;
 
     public Student() {

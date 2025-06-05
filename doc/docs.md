@@ -542,7 +542,7 @@ where s1_0.id = ?
 @Table(name = "students")
 public class Student {
     
-    @OneToOne(mappedBy = "student", cascade = CascadeT ype.PERSIST)
+    @OneToOne(mappedBy = "student", cascade = CascadeType.PERSIST)
     private Profile profile;
 
 }
