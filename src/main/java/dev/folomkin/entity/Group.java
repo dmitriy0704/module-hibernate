@@ -18,7 +18,7 @@ public class Group {
     @Column(name = "grad_year")
     private Long graduationYear;
 
-    @OneToMany(mappedBy = "group")
+    @OneToMany(mappedBy = "group", fetch = FetchType.EAGER)
     private List<Student> studentList;
 
     public Group() {

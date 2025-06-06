@@ -533,7 +533,7 @@ where s1_0.id = ?
 Определяют что делать с дочерними сущностями, если вызвано состояние
 родительской сущности из списка.
 
-Например, если Student переводится в состояние Persist - нужно ли 
+Например, если Student переводится в состояние Persist - нужно ли
 переводить Profile в это же состояние.
 
 ```java
@@ -541,15 +541,14 @@ where s1_0.id = ?
 @Entity
 @Table(name = "students")
 public class Student {
-    
+
     @OneToOne(mappedBy = "student", cascade = CascadeType.PERSIST)
     private Profile profile;
 
 }
 ```
- 
-Если Student в состоянии Persist - то и Profile в Persist
 
+Если Student в состоянии Persist - то и Profile в Persist
 
 #### Типы каскадных операций:
 
@@ -577,3 +576,222 @@ public class Student {
     DETACH
 
 ### OneToMany
+
+```java
+
+Student {
+    @ManyToOne
+    @JoinColumn(name = "group_id")
+    private Group group;
+
+}
+
+Group {
+    @OneToMany(mappedBy = "group", fetch = FetchType.{TYPE})
+    private List<Student> studentList;
+
+}
+
+
+```
+
+**Для одной группы:**
+
+```java
+void demo() {
+
+    // Запрос одной группы
+    var session = sessionFactory.openSession();
+    group1 = session.get(Group.class, 1L);
+    session.close();
+
+    // Запрос связанной сущности
+    List<Student> studentList = group1.getStudentList();
+    studentList.forEach(System.out::println);
+}
+
+```
+
+Вернет:
+
+```sql 
+-- Для LAZY
+
+-- Ленивая загрузка одной сущности: 
+-- var session = sessionFactory.openSession();
+-- group1 = session.get(Group.class, 1L);
+
+select g1_0.id,
+       g1_0.grad_year,
+       g1_0.number
+from student_group g1_0
+where g1_0.id = ?;
+
+-- Если запросить связанную сущность    
+-- List<Student> studentList = group1.getStudentList();
+-- studentList.forEach(System.out::println);
+
+-- то выполнится еще один запрос
+
+select sl1_0.group_id,
+       sl1_0.id,
+       sl1_0.student_age,
+       sl1_0.name,
+       p1_0.id,
+       p1_0.bio,
+       p1_0.last_seen_time
+from students sl1_0
+         left join profiles p1_0 on sl1_0.id = p1_0.student_id
+where sl1_0.group_id = ?;
+
+-->  Student{id=1, name='Vasya', age=22}
+-->  Student{id=2, name='Pasha', age=20}
+
+
+-- Для EAGER
+
+-- При:
+-- var session = sessionFactory.openSession();
+-- group1 = session.get(Group.class, 1L);
+
+select g1_0.id,
+       g1_0.grad_year,
+       g1_0.number,
+       sl1_0.group_id,
+       sl1_0.id,
+       sl1_0.student_age,
+       sl1_0.name,
+       p1_0.id,
+       p1_0.bio,
+       p1_0.last_seen_time 
+from student_group g1_0 
+    left join students sl1_0 on g1_0.id=sl1_0.group_id 
+    left join profiles p1_0 on sl1_0.id=p1_0.student_id 
+where g1_0.id=?;
+
+-->  Student{id=1, name='Vasya', age=22}
+-->  Student{id=2, name='Pasha', age=20}
+
+-- При запросе связанных сущностей все равно выполняется этот же запрос:
+
+select g1_0.id,
+       g1_0.grad_year,
+       g1_0.number,
+       sl1_0.group_id,
+       sl1_0.id,
+       sl1_0.student_age,
+       sl1_0.name,
+       p1_0.id,
+       p1_0.bio,
+       p1_0.last_seen_time 
+from student_group g1_0 
+    left join students sl1_0 on g1_0.id=sl1_0.group_id 
+    left join profiles p1_0 on sl1_0.id=p1_0.student_id 
+where g1_0.id=?
+
+
+```
+
+**Но если запросить все группы:**
+
+```java
+   public List<Group> findAll() {
+    try (Session session = sessionFactory.openSession()) {
+        return session.createQuery(
+                "SELECT g FROM Group AS g", Group.class
+        ).list();
+    }
+}
+```
+
+Вернется N+1:
+
+```sql
+
+-- Для LAZY:
+
+-- Список всех групп
+select g1_0.id, g1_0.grad_year, g1_0.number
+from student_group g1_0;
+
+
+-- Для EAGER:
+
+-- Список всех групп
+
+select g1_0.id, g1_0.grad_year, g1_0.number
+from student_group g1_0;
+
+-- Список студентов привязанных к группе:
+
+select sl1_0.group_id,
+       sl1_0.id,
+       sl1_0.student_age,
+       sl1_0.name,
+       p1_0.id,
+       p1_0.bio,
+       p1_0.last_seen_time
+from students sl1_0
+         left join profiles p1_0 on sl1_0.id = p1_0.student_id
+where sl1_0.group_id = ?;
+
+select sl1_0.group_id,
+       sl1_0.id,
+       sl1_0.student_age,
+       sl1_0.name,
+       p1_0.id,
+       p1_0.bio,
+       p1_0.last_seen_time
+from students sl1_0
+         left join profiles p1_0 on sl1_0.id = p1_0.student_id
+where sl1_0.group_id = ?;
+
+select sl1_0.group_id,
+       sl1_0.id,
+       sl1_0.student_age,
+       sl1_0.name,
+       p1_0.id,
+       p1_0.bio,
+       p1_0.last_seen_time
+from students sl1_0
+         left join profiles p1_0 on sl1_0.id = p1_0.student_id
+where sl1_0.group_id = ?;
+
+```
+
+
+**Решение**
+
+```java
+ public List<Group> findAll() {
+        try(Session session = sessionFactory.openSession()) {
+            return session.createQuery(
+                    """
+                            SELECT g FROM Group AS g
+                            LEFT JOIN FETCH g.studentList s 
+                            LEFT JOIN FETCH s.profile
+                            """, Group.class
+            ).list();
+        }
+    }
+```
+
+Тогда:
+
+```sql
+select g1_0.id,
+       g1_0.grad_year,
+       g1_0.number,
+       sl1_0.group_id,
+       sl1_0.id,
+       sl1_0.student_age,
+       sl1_0.name,
+       p1_0.id,
+       p1_0.bio,
+       p1_0.last_seen_time 
+from student_group g1_0 
+    left join students sl1_0 on g1_0.id=sl1_0.group_id 
+    left join profiles p1_0 on sl1_0.id=p1_0.student_id
+```
+
+## ManyToMany

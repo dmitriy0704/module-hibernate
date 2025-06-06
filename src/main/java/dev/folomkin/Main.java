@@ -8,6 +8,8 @@ import dev.folomkin.services.StudentService;
 import org.hibernate.SessionFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import java.util.List;
+
 
 public class Main {
     public static void main(String[] args) {
@@ -25,16 +27,20 @@ public class Main {
         Group group3 = groupService.saveGroup("3", 2024L);
 
         Student student1 = new Student("Vasya", 22, group1);
-        Student student2 = new Student("Pasha", 20, group1);
+        Student student2 = new Student("Pasha", 20, group2);
 
         studentService.saveStudent(student1);
         studentService.saveStudent(student2);
 
-        var session = sessionFactory.openSession();
+//        var session = sessionFactory.openSession();
+//        group1 = session.get(Group.class, 1L);
+//
+//        List<Student> studentList = group1.getStudentList();
+//        studentList.forEach(System.out::println);
+//        session.close();
 
-        group1 = session.get(Group.class, 1L);
-
-        session.close();
-
+        System.out.println("-------------");
+        System.out.println();
+        groupService.findAll();
     }
 }
