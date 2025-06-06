@@ -1,6 +1,7 @@
 package dev.folomkin.config;
 
 
+import dev.folomkin.entity.Course;
 import dev.folomkin.entity.Group;
 import dev.folomkin.entity.Profile;
 import dev.folomkin.entity.Student;
@@ -20,6 +21,7 @@ public class HibernateConfiguration {
                 .addAnnotatedClass(Student.class) // -> Регистрация сущности
                 .addAnnotatedClass(Profile.class)
                 .addAnnotatedClass(Group.class)
+                .addAnnotatedClass(Course.class)
                 .addPackage("dev.folomkin")
                 .setProperty("hibernate.connection.driver_class", "org.postgresql.Driver")
                 .setProperty("hibernate.connection.url", "jdbc:postgresql://localhost:5433/postgres")
@@ -27,7 +29,8 @@ public class HibernateConfiguration {
                 .setProperty("hibernate.connection.password", "root")
                 .setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect")
                 .setProperty("hibernate.show_sql", "true")
-                .setProperty("hibernate.hbm2ddl.auto", "create-drop"); //-> Создание новой/удаление старой таблиц при старте
+//                .setProperty("hibernate.hbm2ddl.auto", "create-drop"); //-> Создание новой/удаление старой таблиц при старте
+                .setProperty("hibernate.hbm2ddl.auto", "update"); //-> Обновление таблиц при старте
 
 
         return configuration.buildSessionFactory();

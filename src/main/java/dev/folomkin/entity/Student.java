@@ -3,6 +3,9 @@ package dev.folomkin.entity;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "students")
 public class Student {
@@ -17,12 +20,21 @@ public class Student {
     @Column(name = "student_age")
     private Integer age;
 
-    @OneToOne(mappedBy = "student",cascade = CascadeType.REMOVE)
+    @OneToOne(mappedBy = "student", cascade = CascadeType.REMOVE)
     private Profile profile;
 
     @ManyToOne
     @JoinColumn(name = "group_id")
     private Group group;
+
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "student_courses",
+            joinColumns = @JoinColumn(name = "student_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "course_id", referencedColumnName = "id")
+    )
+    List<Course> courseList = new ArrayList<>() ;
 
     public Student() {
     }
@@ -75,6 +87,14 @@ public class Student {
 
     public Long getId() {
         return id;
+    }
+
+    public List<Course> getCourseList() {
+        return courseList;
+    }
+
+    public void setCourseList(List<Course> courseList) {
+        this.courseList = courseList;
     }
 
     @Override

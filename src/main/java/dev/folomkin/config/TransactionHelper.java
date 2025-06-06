@@ -23,7 +23,7 @@ public class TransactionHelper {
     public void executeInTransaction(Consumer<Session> action) {
         Transaction transaction = null;
         try (Session session = this.sessionFactory.openSession()) {
-            transaction = session.beginTransaction();
+            transaction = session.getTransaction();
             transaction.begin();
             action.accept(session);
             session.getTransaction().commit();

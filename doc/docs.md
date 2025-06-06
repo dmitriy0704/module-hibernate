@@ -795,3 +795,104 @@ from student_group g1_0
 ```
 
 ## ManyToMany
+
+
+```java
+Stident {
+    @ManyToMany
+    @JoinTable(
+            name = "student_courses",
+            joinColumns = @JoinColumn(name = "student_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "course_id", referencedColumnName = "id")
+    )
+    List<Course> courseList = new ArrayList<>();
+}
+
+Course {
+    @ManyToMany(mappedBy = "courseList")
+    private List<Student> stringList;
+}
+```
+
+Добавление курса к студенту 
+
+```java
+  public void enrollStudentToCourse(Long courseId, Long studentId) {
+        transactionHelper.executeInTransaction(session -> {
+          var student = session.get(Student.class, studentId);
+          var course = session.get(Course.class, courseId);
+          student.getCourseList().add(course);
+        });
+    }
+```
+
+Запросы в базу:
+
+```sql
+select s1_0.id,
+       s1_0.student_age,
+       g1_0.id,
+       g1_0.grad_year,
+       g1_0.number,
+       s1_0.name,
+       p1_0.id,
+       p1_0.bio,
+       p1_0.last_seen_time
+from students s1_0
+         left join student_group g1_0 on g1_0.id = s1_0.group_id
+         left join profiles p1_0 on s1_0.id = p1_0.student_id
+where s1_0.id = ?;
+
+select sl1_0.group_id,
+       sl1_0.id,
+       sl1_0.student_age,
+       sl1_0.name,
+       p1_0.id,
+       p1_0.bio,
+       p1_0.last_seen_time
+from students sl1_0
+         left join profiles p1_0 on sl1_0.id = p1_0.student_id
+where sl1_0.group_id = ?;
+
+select c1_0.id, c1_0.name, c1_0.type
+from courses c1_0
+where c1_0.id = ?;
+
+select cl1_0.student_id, cl1_1.id, cl1_1.name, cl1_1.type
+from student_courses cl1_0
+         join courses cl1_1 on cl1_1.id = cl1_0.course_id
+where cl1_0.student_id = ?;
+
+
+insert into student_courses (student_id, course_id)
+values (?, ?);
+
+insert into student_courses (student_id, course_id)
+values (?, ?);
+ 
+ insert into student_courses (student_id, course_id)
+values (?, ?);
+```
+
+Решение:
+
+```java
+  public void enrollStudentToCourse(Long courseId, Long studentId) {
+        transactionHelper.executeInTransaction(session -> {
+            String sql = """
+                    INSERT INTO student_courses (student_id, course_id)
+                    VALUES (:studentId, :courseId);
+                    """;
+
+            session.createNativeQuery(sql, Void.class)
+                    .setParameter("studentId", studentId)
+                    .setParameter("courseId", courseId)
+            .executeUpdate();
+         });
+    }
+```
+Тогда:
+
+```sql
+INSERT INTO student_courses (student_id, course_id) VALUES (?, ?);
+```
