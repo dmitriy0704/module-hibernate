@@ -28,7 +28,7 @@ public class Student {
     private Group group;
 
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "student_courses",
             joinColumns = @JoinColumn(name = "student_id", referencedColumnName = "id"),

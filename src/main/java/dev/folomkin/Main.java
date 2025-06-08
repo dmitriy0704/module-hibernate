@@ -42,7 +42,7 @@ public class Main {
         courseService.enrollStudentToCourse(3L, 2L);
 
         Student student = studentService.getById(2L);
-
+        System.out.println(student);
     }
 }
 
